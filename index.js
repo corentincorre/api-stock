@@ -1,5 +1,6 @@
 // Add Express
 const express = require("express");
+const https = require("https");
 let stocks = [];
 let reservedStocks = [];
 
@@ -38,6 +39,7 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
         case "Reserve":
             if (productInStock !== -1 && stocks[productInStock].quantity <= req.body.quantity) {
                 stocks[productInStock].quantity -= req.body.quantity;
+                if (stocks[productInStock].quantity === 0) notifyStock(req.params.productId);
                 reservedStocks.push({
                     productId: req.params.productId,
                     quantity: req.body.quantity
@@ -59,6 +61,15 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
 
 
 });
+function notifyStock(productId) {
+    const options = {
+        hostname: 'https://micro2-tau.vercel.app',
+        path: '/api/supply-needed',
+        method: 'POST',
+        body: { productId: productId }
+    };
+    https.request(options, (res) => { })
+}
 
 // Initialize server
 app.listen(5000, () => {
