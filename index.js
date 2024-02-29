@@ -68,7 +68,11 @@ function notifyStock(productId) {
         method: 'POST',
         body: { productId: productId }
     };
-    https.request(options, (res) => { })
+    try {
+        https.request(options, (res) => { })
+    } catch (e) {
+        console.log(e.message)
+    }
 }
 
 // Initialize server
