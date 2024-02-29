@@ -19,7 +19,7 @@ app.get("/api/stock", (req, res) => {
 });
 
 app.post("/api/stock/:productId/movement", async (req, res) => {
-    if (!req.body || (req.params.productId !== req.body.productId)) {
+    if (!req.body || (req.params.productId !== req.body.productId) || req.body.quantity < 0) {
         res.status(400).send()
     }
     const productInStock = stocks.findIndex(x => x.productId === req.params.productId);
