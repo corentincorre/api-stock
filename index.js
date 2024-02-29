@@ -46,7 +46,12 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
             }
             return res.status(400);
         case "Removal":
-            break;
+            const productInReservedStock = reservedStocks.findIndex(x => x.productId === req.params.productId);
+            if (productInReservedStock !== -1 && reservedStocks[productInReservedStock].quantity <= req.body.quantity) {
+                reservedStocks[productInReservedStock] -= req.body.quantity;
+                return res.status(204);
+            }
+            return res.status(400);
         default:
             return res.status(400);
     }
