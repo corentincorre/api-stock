@@ -36,7 +36,7 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
             if (productInCatalog && !(productInCatalog.statusCode === 500)) {
                 stocks.push({
                     productId: req.params.productId,
-                    quantity: req.body.quantity
+                    quantity: req.body.quantity ? req.body.quantity : 0
                 });
                 res.status(204);
                 break;
@@ -49,7 +49,7 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
                 if (stocks[productInStock].quantity === 0) notifyStock(req.params.productId);
                 reservedStocks.push({
                     productId: req.params.productId,
-                    quantity: req.body.quantity
+                    quantity: req.body.quantity ? req.body.quantity : 0
                 });
                 res.status(204);
                 break;
