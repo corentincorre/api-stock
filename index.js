@@ -4,6 +4,7 @@ const https = require("https");
 let stocks = [];
 let reservedStocks = [];
 
+
 // Initialize Express
 const app = express();
 app.use(express.json())
@@ -24,7 +25,8 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
         case "Supply":
             if (productInStock !== -1) {
                 stocks[productInStock].quantity += req.body.quantity;
-                return res.status(204);
+                res.status(204);
+                break;
             }
             const respProductInCatalog = await fetch("http://microservices.tp.rjqu8633.odns.fr/api/products/" + req.params.productId);
             const productInCatalog = await respProductInCatalog.json();
@@ -33,33 +35,38 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
                     productId: req.params.productId,
                     quantity: req.body.quantity
                 });
-                return res.status(204);
+                res.status(204);
+                break;
             }
-            return res.status(401);
+            res.status(401);
+            break;
         case "Reserve":
-            if (productInStock !== -1 && stocks[productInStock].quantity <= req.body.quantity) {
+            if (productInStock !== -1 && (stocks[productInStock].quantity <= req.body.quantity)) {
                 stocks[productInStock].quantity -= req.body.quantity;
                 if (stocks[productInStock].quantity === 0) notifyStock(req.params.productId);
                 reservedStocks.push({
                     productId: req.params.productId,
                     quantity: req.body.quantity
                 });
-                return res.status(204);
+                res.status(204);
+                break;
             }
-            return res.status(400);
+            res.status(400);
+            break;
         case "Removal":
             const productInReservedStock = reservedStocks.findIndex(x => x.productId === req.params.productId);
-            if (productInReservedStock !== -1 && reservedStocks[productInReservedStock].quantity <= req.body.quantity) {
+            if (productInReservedStock !== -1 && (reservedStocks[productInReservedStock].quantity <= req.body.quantity)) {
                 reservedStocks[productInReservedStock] -= req.body.quantity;
-                return res.status(204);
+                res.status(204);
+                break;
             }
-            return res.status(400);
+            res.status(400);
+            break;
         default:
-            return res.status(400);
+            res.status(400);
+            break;
     }
-
-
-
+    res.send()
 });
 function notifyStock(productId) {
     const options = {
@@ -68,11 +75,11 @@ function notifyStock(productId) {
         method: 'POST',
         body: { productId: productId }
     };
-    try {
-        https.request(options, (res) => { })
-    } catch (e) {
-        console.log(e.message)
-    }
+
+    const req = https.request(options)
+    req.on('error', (e) => {
+        console.error(e);
+    });
 }
 
 // Initialize server
