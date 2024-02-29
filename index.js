@@ -12,12 +12,11 @@ app.get("/api/ping", (req, res) => {
 });
 
 app.get("/api/stock", (req, res) => {
-    res.status(200).send(JSON.stringify(stocks));
+    res.status(200).json(stocks);
 });
 
 app.post("/api/stock/:productId/movement", async (req, res) => {
 
-    console.log(req.body)
     const productInStock = stocks.findIndex(x => x.productId === req.params.productId);
     if (productInStock !== -1) {
         stocks[productInStock].quantity += req.body.quantity;
