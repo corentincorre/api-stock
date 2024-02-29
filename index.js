@@ -19,6 +19,9 @@ app.get("/api/stock", (req, res) => {
 });
 
 app.post("/api/stock/:productId/movement", async (req, res) => {
+    if (!req.body || (req.params.productId !== req.body.productId)) {
+        res.status(400).send()
+    }
     const productInStock = stocks.findIndex(x => x.productId === req.params.productId);
 
     switch (req.body.status) {
@@ -30,7 +33,7 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
             }
             const respProductInCatalog = await fetch("http://microservices.tp.rjqu8633.odns.fr/api/products/" + req.params.productId);
             const productInCatalog = await respProductInCatalog.json();
-            if (productInCatalog) {
+            if (productInCatalog && !(productInCatalog.statusCode === 500)) {
                 stocks.push({
                     productId: req.params.productId,
                     quantity: req.body.quantity
