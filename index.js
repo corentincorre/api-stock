@@ -44,7 +44,7 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
             res.status(401);
             break;
         case "Reserve":
-            if (productInStock !== -1 && (stocks[productInStock].quantity <= req.body.quantity)) {
+            if (productInStock !== -1 && (stocks[productInStock].quantity >= req.body.quantity)) {
                 stocks[productInStock].quantity -= req.body.quantity;
                 if (stocks[productInStock].quantity === 0) notifyStock(req.params.productId);
                 reservedStocks.push({
@@ -58,7 +58,7 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
             break;
         case "Removal":
             const productInReservedStock = reservedStocks.findIndex(x => x.productId === req.params.productId);
-            if (productInReservedStock !== -1 && (reservedStocks[productInReservedStock].quantity <= req.body.quantity)) {
+            if (productInReservedStock !== -1 && (reservedStocks[productInReservedStock].quantity >= req.body.quantity)) {
                 reservedStocks[productInReservedStock] -= req.body.quantity;
                 res.status(204);
                 break;
@@ -82,6 +82,7 @@ function notifyStock(productId) {
     const req = https.request(options)
     req.on('error', (e) => {
         console.error(e);
+        setTimeout(() => notifyStock(productId), 5000)
     });
 }
 
