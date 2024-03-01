@@ -36,7 +36,7 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
             if (productInCatalog && !(productInCatalog.statusCode === 500)) {
                 stocks.push({
                     productId: req.params.productId,
-                    quantity: req.body.quantity ? req.body.quantity : 0
+                    quantity: req.body.quantity
                 });
                 res.status(204);
                 break;
@@ -47,10 +47,15 @@ app.post("/api/stock/:productId/movement", async (req, res) => {
             if (productInStock !== -1 && (stocks[productInStock].quantity >= req.body.quantity)) {
                 stocks[productInStock].quantity -= req.body.quantity;
                 if (stocks[productInStock].quantity === 0) notifyStock(req.params.productId);
-                reservedStocks.push({
-                    productId: req.params.productId,
-                    quantity: req.body.quantity ? req.body.quantity : 0
-                });
+                const productInReservedStock = reservedStocks.findIndex(x => x.productId === req.params.productId);
+                if (productInReservedStock !== -1) {
+                    reservedStocks[productInReservedStock].quantity += req.body.quantity;
+                } else {
+                    reservedStocks.push({
+                        productId: req.params.productId,
+                        quantity: req.body.quantity
+                    });
+                }
                 res.status(204);
                 break;
             }
